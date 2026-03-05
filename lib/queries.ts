@@ -47,6 +47,17 @@ export async function getLiveTasks() {
   return data
 }
 
+export async function getHousekeepingTasks() {
+  const today = new Date().toISOString().split('T')[0]
+  const { data, error } = await supabase
+    .from('housekeeping')
+    .select(`*, properties(name), bookings(guest_name, check_in, check_out)`)
+    .order('scheduled_at', { ascending: true })
+
+  if (error) throw error
+  return data
+}
+
 export async function getProperties() {
   const { data, error } = await supabase
     .from('properties')

@@ -1,70 +1,67 @@
 import { Clock, Users, CheckCircle, Loader, Calendar } from "lucide-react";
-import { CleanTask, CleanStatus, CleanType } from "./types";
 
-const statusConfig: Record<CleanStatus, { label: string; color: string; icon: React.ReactNode }> = {
-  Scheduled: {
-    label: "Scheduled",
-    color: "bg-black/5 text-black/50",
-    icon: <Calendar size={11} />,
-  },
-  "In Progress": {
-    label: "In Progress",
-    color: "bg-blue-50 text-blue-600",
-    icon: <Loader size={11} className="animate-spin" />,
-  },
-  Completed: {
-    label: "Completed",
-    color: "bg-green-50 text-green-600",
-    icon: <CheckCircle size={11} />,
-  },
-};
+const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
+  "Scheduled":   { label: "Scheduled",   color: "bg-black/5 text-black/50",   icon: <Calendar size={11} /> },
+  "In Progress": { label: "In Progress", color: "bg-blue-50 text-blue-600",   icon: <Loader size={11} className="animate-spin" /> },
+  "Completed":   { label: "Completed",   color: "bg-green-50 text-green-600", icon: <CheckCircle size={11} /> },
+}
 
-const cleanTypeColor: Record<CleanType, string> = {
-  "Departure Clean": "bg-orange-50 text-orange-600 border-orange-200",
-  "Stayover Clean": "bg-blue-50 text-blue-600 border-blue-200",
-  "Deep Clean": "bg-purple-50 text-purple-600 border-purple-200",
+const cleanTypeColor: Record<string, string> = {
+  "Departure Clean":   "bg-orange-50 text-orange-600 border-orange-200",
+  "Stayover Clean":    "bg-blue-50 text-blue-600 border-blue-200",
+  "Deep Clean":        "bg-purple-50 text-purple-600 border-purple-200",
   "Pre-Arrival Clean": "bg-green-50 text-green-600 border-green-200",
-};
+}
 
-export function CleanCard({ task }: { task: CleanTask }) {
-  const status = statusConfig[task.status];
+export function CleanCard({ task }: { task: any }) {
+  const status = statusConfig[task.status] ?? statusConfig["Scheduled"]
+  const propertyName = task.properties?.name ?? ''
+  const guestName = task.bookings?.guest_name ?? ''
+  const checkIn = task.bookings?.check_in
+  const scheduledTime = task.scheduled_at
+    ? new Date(task.scheduled_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+    : ''
 
   return (
-    <div className={`bg-white border border-black/[0.07] rounded-xl p-4 space-y-3 ${
-      task.status === "Completed" ? "opacity-60" : ""
-    }`}>
+    <div className={`bg-white border border-black/[0.07] rounded-xl p-4 space-y-3 ${task.status === 'Completed' ? 'opacity-60' : ''}`}>
       {/* Property + Type */}
       <div className="flex items-center justify-between">
-        <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${task.propertyColor}`}>
-          {task.property}
+        <span className="text-[11px] font-medium text-black/60 bg-black/5 px-2 py-0.5 rounded-full">
+          {propertyName}
         </span>
-        <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${cleanTypeColor[task.cleanType]}`}>
-          {task.cleanType}
+        <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${cleanTypeColor[task.clean_type] ?? 'bg-black/5 text-black/40 border-black/10'}`}>
+          {task.clean_type}
         </span>
       </div>
 
       {/* Guest */}
-      <div className="flex items-center gap-1.5 text-sm text-black/70">
-        <Users size={13} className="text-black/30" />
-        {task.guestName}
-      </div>
+      {guestName && (
+        <div className="flex items-center gap-1.5 text-sm text-black/70">
+          <Users size={13} className="text-black/30" />
+          {guestName}
+        </div>
+      )}
 
       {/* Time */}
-      <div className="flex items-center gap-1.5 text-xs text-black/40">
-        <Clock size={11} />
-        {task.scheduledAt}
-        {task.checkInAt && (
-          <span className="ml-1 text-orange-600 font-medium">· Check-in {task.checkInAt}</span>
-        )}
-      </div>
+      {scheduledTime && (
+        <div className="flex items-center gap-1.5 text-xs text-black/40">
+          <Clock size={11} />
+          {scheduledTime}
+          {checkIn && task.status !== 'Completed' && (
+            <span className="ml-1 text-orange-600 font-medium">
+              · Check-in {new Date(checkIn).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Footer */}
       <div className="flex items-center justify-between pt-1 border-t border-black/[0.05]">
         <div className="flex items-center gap-1.5 text-xs text-black/40">
           <div className="w-5 h-5 rounded bg-black/8 flex items-center justify-center text-[10px] font-semibold text-black/50">
-            {task.assignedTeam.split(" ")[1]}
+            {task.assigned_team?.split(' ')[1] ?? '?'}
           </div>
-          {task.assignedTeam}
+          {task.assigned_team}
         </div>
         <div className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded-lg ${status.color}`}>
           {status.icon}
@@ -72,5 +69,5 @@ export function CleanCard({ task }: { task: CleanTask }) {
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -1,4 +1,5 @@
 import { Clock, Truck, Package, CheckCircle, Calendar, Home, Receipt } from "lucide-react";
+import { StatusUpdater } from "./status-updater";
 
 const priorityStyles: Record<string, string> = {
   Critical: "bg-red-100 text-red-600 border-red-200",
@@ -88,6 +89,9 @@ export function TicketCard({ ticket }: { ticket: any }) {
           )}
         </div>
       )}
+
+      {/* Status updater */}
+      <StatusUpdater ticketId={ticket.id} currentStatus={ticket.status} />
 
       {/* Cost */}
       <div className="flex items-center justify-between pt-1 border-t border-black/[0.05]">
